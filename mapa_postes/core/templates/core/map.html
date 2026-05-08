@@ -1,50 +1,292 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>Mapa</title>
+
     {% load static %}
 
-    <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-     
+    <!-- css -->
+    <link
+        rel="stylesheet"
+        href="{% static 'core/css/style.css' %}"
+    >
+
+    <!-- leaflet -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
 </head>
+
 <body>
-    
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""></script>
 
+    <!-- leaflet js -->
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""
+    ></script>
+
+    <!-- sidebar -->
     <div id="sidebar">
-    <h2>Controle</h2>
 
-    <button onclick="ativarModoCriacao()">
-        ➕ Adicionar Poste
-    </button>
+        <h2>Controle</h2>
 
-    <hr>
+        <!-- botão criar -->
+        <button onclick="ativarModoCriacao()">
+            ➕ Adicionar Poste
+        </button>
 
-    <div id="info">
-        Nenhuma ação selecionada
+        <!-- botão editar -->
+        <button onclick="ativarModoEdicao()">
+            ✏️ Editar Poste
+        </button>
+
+        <hr>
+
+        <!-- informações -->
+        <div id="info">
+            Nenhuma ação selecionada
+        </div>
+
     </div>
-    </div>
 
-    <!-- MODAL -->
+    <!-- modal criar -->
     <div id="modal" class="modal">
-    <div class="modal-content">
-        <h2>Novo Poste</h2>
 
-        <input type="text" id="nome" placeholder="Nome do poste">
+        <div class="modal-content">
 
-        <button onclick="salvarPoste()">Salvar</button>
-        <button onclick="fecharModal()">Cancelar</button>
+            <h2>Novo Poste</h2>
+
+            <!-- nome -->
+            <input
+                type="text"
+                id="nome"
+                placeholder="Nome"
+            >
+
+            <!-- latitude -->
+            <input
+                type="text"
+                id="latitude"
+                placeholder="Latitude"
+            >
+
+            <!-- longitude -->
+            <input
+                type="text"
+                id="longitude"
+                placeholder="Longitude"
+            >
+
+            <!-- status -->
+            <select id="status">
+
+            <option value="">
+                Selecione o status
+            </option>
+
+            <option value="ativo">
+                Ativo
+            </option>
+
+            <option value="manutencao">
+                Manutenção
+            </option>
+
+            <option value="desativado">
+                Desativado
+            </option>
+
+            </select>
+
+            <select id="tipo">
+
+            <option value="">
+                Selecione o tipo
+            </option>
+
+            <option value="backbone">
+                Backbone
+            </option>
+
+            <option value="distribuicao">
+                Distribuição
+            </option>
+
+            <option value="cto">
+                CTO
+            </option>
+
+            <option value="atendimento">
+                Atendimento
+            </option>
+
+            <option value="derivacao">
+                Derivação
+            </option>
+
+            <option value="passagem">
+                Passagem
+            </option>
+
+            <option value="reserva">
+                Reserva
+            </option>
+
+            <option value="emenda">
+                Emenda
+            </option>
+
+            <option value="splitter">
+                Splitter
+            </option>
+
+        </select>
+
+            <!-- observação -->
+            <textarea
+                id="observacao"
+                placeholder="Observação"
+            ></textarea>
+
+            <!-- salvar -->
+            <button onclick="salvarPoste()">
+                Salvar
+            </button>
+
+            <!-- cancelar -->
+            <button onclick="fecharModal()">
+                Cancelar
+            </button>
+
+        </div>
+
     </div>
+
+    <!-- modal editar -->
+    <div id="modal-edit" class="modal">
+
+        <div class="modal-content">
+
+            <h2>Editar Poste</h2>
+
+            <!-- nome -->
+            <input
+                type="text"
+                id="nome-edit"
+                placeholder="Nome"
+            >
+
+            <!-- latitude -->
+            <input
+                type="text"
+                id="latitude-edit"
+                placeholder="Latitude"
+            >
+
+            <!-- longitude -->
+            <input
+                type="text"
+                id="longitude-edit"
+                placeholder="Longitude"
+            >
+
+            <!-- status -->
+            <select id="status-edit">
+
+            <option value="ativo">
+                Ativo
+            </option>
+
+            <option value="manutencao">
+                Manutenção
+            </option>
+
+            <option value="desativado">
+                Desativado
+            </option>
+
+            </select>
+
+            <select id="tipo-edit">
+
+            <option value="">
+                Selecione o tipo
+            </option>
+
+            <option value="backbone">
+                Backbone
+            </option>
+
+            <option value="distribuicao">
+                Distribuição
+            </option>
+
+            <option value="cto">
+                CTO
+            </option>
+
+            <option value="atendimento">
+                Atendimento
+            </option>
+
+            <option value="derivacao">
+                Derivação
+            </option>
+
+            <option value="passagem">
+                Passagem
+            </option>
+
+            <option value="reserva">
+                Reserva
+            </option>
+
+            <option value="emenda">
+                Emenda
+            </option>
+
+            <option value="splitter">
+                Splitter
+            </option>
+
+        </select>
+
+            <!-- observação -->
+            <textarea
+                id="observacao-edit"
+                placeholder="Observação"
+            ></textarea>
+
+            <!-- salvar -->
+            <button onclick="salvarEdicao()">
+                Salvar
+            </button>
+
+            <!-- cancelar -->
+            <button onclick="fecharModal()">
+                Cancelar
+            </button>
+
+        </div>
+
     </div>
 
-
+    <!-- mapa -->
     <div id="map"></div>
 
-    <script src="{% static 'core/js/script.js' %}"></script>   
+    <!-- js -->
+    <script src="{% static 'core/js/script.js' %}"></script>
+
 </body>
 </html>

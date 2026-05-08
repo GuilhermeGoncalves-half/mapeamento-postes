@@ -4,5 +4,5 @@ from . import views
 urlpatterns = [
     path('postes/', views.listar_postes),
     path('postes/criar/', views.criar_poste),
-    path('', views.map),
+    path('api/postes/<int:id>/',views.editar_poste),
 ]

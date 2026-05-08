@@ -1,53 +1,308 @@
+/* reset */
 *{
-    box-sizing: border-box;
     margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
+/* body */
+body{
+    display: flex;
+    width: 100%;
+    height: 100vh;
+
+    overflow: hidden;
+
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+
+    background-color: #eefaf8;
 }
 
-/* SIDEBAR */
-#sidebar {
-  width: 280px;
-  min-width: 280px;
-  background: #1e1e1e;
-  color: white;
-  padding: 20px;
+/* mapa */
+#map{
+    flex: 1;
+    height: 100vh;
+    z-index: 1;
 }
 
-#sidebar button {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  cursor: pointer;
+/* sidebar */
+#sidebar{
+    width: 280px;
+    height: 100vh;
+
+    padding: 25px;
+
+    background: #dff7f3;
+
+    border-right: 1px solid #c7ebe5;
+
+    box-shadow: 4px 0 15px rgba(0,0,0,0.08);
+
+    z-index: 1000;
 }
 
-/* MAPA */
-#map {
-  flex: 1;
-  height: 100vh;
+/* título */
+#sidebar h2{
+    margin-bottom: 25px;
+
+    color: #255b55;
+
+    font-size: 28px;
 }
 
-/* MODAL */
-.modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.6);
-  z-index: 9999;
+/* linha */
+#sidebar hr{
+    margin: 25px 0;
+
+    border: none;
+    border-top: 1px solid #b8ddd7;
 }
 
-.modal-content {
-  background: white;
-  padding: 20px;
-  width: 300px;
-  margin: 100px auto;
-  border-radius: 8px;
+/* info */
+#info{
+    color: #3f6f69;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+/* botões */
+button{
+    width: 100%;
+
+    padding: 14px;
+
+    margin-bottom: 15px;
+
+    border: none;
+    border-radius: 12px;
+
+    background: #52b7a8;
+
+    color: white;
+
+    font-size: 15px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+
+    box-shadow: 0 5px 12px rgba(82, 183, 168, 0.25);
+}
+
+/* hover botão */
+button:hover{
+    background: #469f92;
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 8px 18px rgba(82, 183, 168, 0.35);
+}
+
+/* click botão */
+button:active{
+    transform: scale(0.98);
+}
+
+/* modal fundo */
+.modal{
+    display: none;
+
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0,0,0,0.35);
+
+    backdrop-filter: blur(3px);
+
+    z-index: 9999;
+}
+
+/* conteúdo modal */
+.modal-content{
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    width: 420px;
+
+    padding: 30px;
+
+    border-radius: 18px;
+
+    background: white;
+
+    box-shadow:
+        0 12px 30px rgba(0,0,0,0.18),
+        0 4px 10px rgba(0,0,0,0.08);
+
+    animation: aparecer 0.25s ease;
+}
+
+/* animação modal */
+@keyframes aparecer{
+    from{
+        opacity: 0;
+        transform: translate(-50%, -45%);
+    }
+
+    to{
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+/* título modal */
+.modal-content h2{
+    margin-bottom: 20px;
+
+    color: #255b55;
+
+    text-align: center;
+}
+
+/* inputs */
+.modal-content input,
+.modal-content textarea{
+    width: 100%;
+
+    padding: 12px;
+
+    margin-bottom: 15px;
+
+    border: 1px solid #c8e6e1;
+
+    border-radius: 10px;
+
+    background: #f7fffd;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition:
+        border 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+/* foco input */
+.modal-content input:focus,
+.modal-content textarea:focus{
+    border-color: #52b7a8;
+
+    box-shadow: 0 0 0 4px rgba(82, 183, 168, 0.15);
+}
+
+/* textarea */
+.modal-content textarea{
+    resize: none;
+    height: 100px;
+}
+
+/* leaflet popup */
+.leaflet-popup-content-wrapper{
+    border-radius: 12px;
+}
+
+/* scrollbar */
+::-webkit-scrollbar{
+    width: 8px;
+}
+
+::-webkit-scrollbar-thumb{
+    background: #9ed8cf;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-track{
+    background: #eefaf8;
+}
+
+/* fundo do popup */
+.leaflet-popup-content-wrapper{
+    background: #f7fffd;
+
+    color: #255b55;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 10px 25px rgba(0,0,0,0.15);
+
+    border: 1px solid #c8e6e1;
+}
+
+/* texto do popup */
+.leaflet-popup-content{
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+
+    font-size: 14px;
+
+    font-weight: bold;
+
+    margin: 14px 18px;
+}
+
+/* pontinha do popup */
+.leaflet-popup-tip{
+    background: #f7fffd;
+}
+
+/* botão fechar */
+.leaflet-popup-close-button{
+    color: #52b7a8 !important;
+
+    font-size: 18px !important;
+
+    padding: 6px !important;
+
+    transition: 0.2s;
+}
+
+/* hover botão fechar */
+.leaflet-popup-close-button:hover{
+    color: #255b55 !important;
+
+    transform: scale(1.1);
+}
+
+.modal-content select{
+    width: 100%;
+
+    padding: 12px;
+
+    margin-bottom: 15px;
+
+    border: 1px solid #c8e6e1;
+
+    border-radius: 10px;
+
+    background: #f7fffd;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition:
+        border 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.modal-content select:focus{
+    border-color: #52b7a8;
+
+    box-shadow: 0 0 0 4px rgba(82, 183, 168, 0.15);
 }

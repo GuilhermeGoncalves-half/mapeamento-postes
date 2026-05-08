@@ -1,0 +1,8 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('postes/', views.listar_postes),
+    path('postes/criar/', views.criar_poste),
+    path('', views.map),
+]

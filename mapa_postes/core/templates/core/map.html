@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa</title>
+    {% load static %}
+
+    <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+     
+</head>
+<body>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script>
+
+    <div id="sidebar">
+    <h2>Controle</h2>
+
+    <button onclick="ativarModoCriacao()">
+        ➕ Adicionar Poste
+    </button>
+
+    <hr>
+
+    <div id="info">
+        Nenhuma ação selecionada
+    </div>
+    </div>
+
+    <!-- MODAL -->
+    <div id="modal" class="modal">
+    <div class="modal-content">
+        <h2>Novo Poste</h2>
+
+        <input type="text" id="nome" placeholder="Nome do poste">
+
+        <button onclick="salvarPoste()">Salvar</button>
+        <button onclick="fecharModal()">Cancelar</button>
+    </div>
+    </div>
+
+
+    <div id="map"></div>
+
+    <script src="{% static 'core/js/script.js' %}"></script>   
+</body>
+</html>

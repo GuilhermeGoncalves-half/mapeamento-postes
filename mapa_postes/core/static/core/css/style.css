@@ -306,3 +306,11 @@ button:active{
 
     box-shadow: 0 0 0 4px rgba(82, 183, 168, 0.15);
 }
+
+.modal-content #erro{
+    color: #ff0000;
+    font-size: 20px;
+    text-align: center;
+    padding: 10px;
+    margin: 8px;
+}

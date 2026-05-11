@@ -5,6 +5,7 @@ var map = L.map('map', {
 }).setView([-22.4735, -46.6317], 16);
 
 // controla modos
+let modoExclusao = false;
 let modoCriacao = false;
 let modoEdicao = false;
 
@@ -14,6 +15,9 @@ let lngSelecionado = null;
 
 // guarda id do poste editando
 let posteEditandoId = null;
+
+//guarda id do poste excluindo
+let posteExcluindoId = null;
 
 // guarda marker selecionado
 let markerSelecionado = null;
@@ -97,26 +101,23 @@ fetch('api/postes/')
 
         // popup
         .bindPopup(`
-            <b>${p.nome}</b><br>
+            <b>ID: ${p.id}</b><br>
             Status: ${p.status}
         `);
 
         // click no marker
         marker.on('click', () => {
 
-            // só no modo edição
-            if (!modoEdicao) return;
+            // só no modo edição ou exclusão
+            if (!modoEdicao && !modoExclusao) return;
 
+            if (modoEdicao){
+            
             // salva marker
             markerSelecionado = marker;
 
             // salva id
             posteEditandoId = p.id;
-
-            // preenche nome
-            document.getElementById(
-                'nome-edit'
-            ).value = p.nome || '';
 
             // preenche latitude
             document.getElementById(
@@ -145,6 +146,17 @@ fetch('api/postes/')
 
             // abre modal
             abrirModalEdit();
+
+            }
+
+            if (modoExclusao){
+
+            // salva id
+            posteExcluindoId = p.id;
+
+            // abre modal
+            abrirModalExclusao();
+            }
         });
 
     });
@@ -172,6 +184,14 @@ function abrirModalEdit() {
     ).style.display = 'block';
 }
 
+// abre modal excluir
+function abrirModalExclusao() {
+
+    document.getElementById(
+        'modal-delete'
+    ).style.display = 'block';
+}
+
 // fecha modais
 function fecharModal() {
 
@@ -182,10 +202,14 @@ function fecharModal() {
     document.getElementById(
         'modal-edit'
     ).style.display = 'none';
+    document.getElementById(
+        'modal-delete'
+    ).style.display = 'none';
 
     // desativa modos
     modoCriacao = false;
     modoEdicao = false;
+    modoExclusao = false;
 
     // cursor normal
     document.getElementById(
@@ -239,6 +263,20 @@ function ativarModoEdicao() {
     'Clique em um poste para editar';
 }
 
+// ativa exclusao
+function ativarModoExclusao(){
+
+    modoExclusao = true;
+    modoEdicao = false;
+    modoCriacao = false;
+
+    document.getElementById(
+        'info'
+    ).innerText =
+    'Clique em um poste para excluir';
+
+}
+
 // click mapa
 map.on('click', function(e) {
 
@@ -264,15 +302,10 @@ map.on('click', function(e) {
 });
 
 // salva poste
-function salvarPoste() {
+async function salvarPoste() {
 
     // monta objeto
     const dados = {
-
-        nome:
-        document.getElementById(
-            'nome'
-        ).value,
 
         latitude:
         document.getElementById(
@@ -300,19 +333,43 @@ function salvarPoste() {
         ).value
     };
 
-    // envia api
-    fetch('/api/postes/criar/', {
+    try {
 
-        method: 'POST',
+        // envia api
+        const response = await fetch('/api/postes/criar/', {
 
-        headers: {
-            'Content-Type': 'application/json'
-        },
+            method: 'POST',
 
-        body: JSON.stringify(dados)
-    })
+            headers: {
+                'Content-Type': 'application/json'
+            },
 
-    .then(() => location.reload());
+            body: JSON.stringify(dados)
+        })
+
+        // pega resposta json
+        const result = await response.json()
+
+        // verifica erro
+        if (!response.ok) {
+
+            document.getElementById('erro').innerText = result.error
+
+            return
+        }
+
+        // sucesso
+        alert('Poste criado com sucesso')
+
+        location.reload()
+
+    } catch (error) {
+
+        document.getElementById('erro').innerText =
+            'Erro ao conectar com o servidor'
+
+        console.error(error)
+    }
 }
 
 // salva edição
@@ -320,11 +377,6 @@ function salvarEdicao() {
 
     // monta objeto
     const dados = {
-
-        nome:
-        document.getElementById(
-            'nome-edit'
-        ).value,
 
         latitude:
         document.getElementById(
@@ -353,7 +405,7 @@ function salvarEdicao() {
     };
 
     // envia atualização
-    fetch(`/api/postes/${posteEditandoId}/`, {
+    fetch(`/api/postes/editar/${posteEditandoId}/`, {
 
         method: 'PUT',
 
@@ -387,3 +439,40 @@ function salvarEdicao() {
         fecharModal();
     });
 }
+
+async function excluirPoste(){
+
+    // envia exclusão
+    try{
+
+        // envia api
+        const response = await fetch(`/api/postes/excluir/${posteExcluindoId}/`,
+            {
+            method: 'DELETE'
+            }
+        )
+
+        //recebe o resultado
+        const result = await response.json()
+
+        // erro
+        if(!response.ok){
+
+            // mostra o erro
+            document.getElementById('erro').innerText = result.error
+
+            return
+        }
+
+        //sucesso
+        alert(result.status)
+
+        //recarrega o mapa
+        location.reload()
+
+    } catch (error){
+
+        return console.log(error)
+
+    }
+    } 

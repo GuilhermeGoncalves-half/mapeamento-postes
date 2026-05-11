@@ -4,28 +4,30 @@ from django.http import JsonResponse
 import json 
 from django.views.decorators.csrf import csrf_exempt
 
-
-def listar_postes(request):
-    postes = list(Poste.objects.values())
-    return JsonResponse(postes, safe=False)
-
-@csrf_exempt
-def criar_poste(request):
-    if request.method =="POST":
+def validacao(request):
+        
+        # variável para puxar os dados HTML
         data = json.loads(request.body)
         
-        nome = data["nome"],
-        latitude = data["latitude"],
-        longitude = data["longitude"],
-        status = data["status"],
-        obs = data["obs"],
+        # atribuindo variáveis aos dados
+        latitude = data["latitude"]
+        longitude = data["longitude"]
+        status = data["status"]
+        obs = data["obs"]
         tipo = data["tipo"]
-
-        # valida nome
-        if not nome:
+        
+        # valida status
+        if not status:
 
             return JsonResponse({
-                'error': 'Nome obrigatório'
+            "error": "Status obrigatório"
+            }, status=400)
+            
+        # valida tipo
+        if not tipo:
+
+            return JsonResponse({
+            "error": "Tipo obrigatório"
             }, status=400)
 
         # valida latitude
@@ -41,9 +43,61 @@ def criar_poste(request):
             return JsonResponse({
                 'error': 'Longitude obrigatória'
             }, status=400)
+        
+        # verifica se é float
+        try:
+            latitude = float(data.get("latitude"))
+        except(TypeError, ValueError):
+            return JsonResponse({
+                "error": "Latitude inválida"
+            })
+        try:
+            longitude = float(data.get("longitude"))
+        except(TypeError, ValueError):
+            return JsonResponse({
+                "error": "Longitude inválida"
+            })
+        
+        # verifica se a latitude pode ser real
+        
+        if latitude < -90 or latitude > 90:
+            return JsonResponse({
+                "error": "Latitude deve estar entre -90 e 90"
+            },status=400)
+        
+        # verifica se a longitude pode ser real
+        if longitude < -180 or longitude > 180:
+            return JsonResponse({
+                "error": "Longitude deve estar entre -180 e 180"
+            },status=400)
 
+
+def listar_postes(request):
+    postes = list(Poste.objects.values())
+    return JsonResponse(postes, safe=False)
+
+@csrf_exempt
+def criar_poste(request):
+    if request.method =="POST":
+
+        # validação de erros
+        erro = validacao(request)
+
+        if erro:
+            return erro
+
+        # variável para puxar os dados HTML
+        data = json.loads(request.body)
+        
+        # atribuindo variáveis aos dados
+        latitude = data["latitude"]
+        longitude = data["longitude"]
+        status = data["status"]
+        obs = data["obs"]
+        tipo = data["tipo"]
+
+        # cria o poste
         poste = Poste.objects.create(
-            nome=nome,
             latitude=latitude,
             longitude=longitude,
             status=status,
@@ -51,7 +105,7 @@ def criar_poste(request):
             tipo=tipo
         )
 
-        return JsonResponse({"status": "ok"})
+        return JsonResponse({"status": "Criado com sucesso!"})
     
     return JsonResponse({"error": "Método nao permitido"}, status=405)
 
@@ -64,42 +118,33 @@ def editar_poste(request, id):
     # só aceita PUT
     if request.method == 'PUT':
 
+        # validação de erros
+        erro = validacao(request)
+
+        if erro:
+            return erro
+
         try:
         # pega poste
             poste = Poste.objects.get(id=id)
 
         except:
         # verifica se existe
-            if poste.DoesNotExist(): return JsonResponse({"error": "Poste não encontrado"}, status=404)
+            if poste.DoesNotExist: 
+                return JsonResponse({
+                    "error": "Poste não encontrado"
+                }, status=404)
+            
 
         # pega json enviado
         data = json.loads(request.body)
 
-        nome = data["nome"],
-        latitude = data["latitude"],
-        longitude = data["longitude"],
-
-        # validações
-        if not nome:
-
-            return JsonResponse({
-                'error': 'Nome obrigatório'
-            }, status=400)
-        if not latitude:
-
-            return JsonResponse({
-                'error': 'Latitude obrigatório'
-            }, status=400)
-        
-        if not longitude:
-
-            return JsonResponse({
-                'error': 'Longitude obrigatório'
-            }, status=400)
-
+        latitude = data["latitude"]
+        longitude = data["longitude"]
+        status = data["status"]
+        tipo = data["tipo"]
 
         # atualiza campos
-        poste.nome = data.get('nome')
         poste.latitude = data.get('latitude')
         poste.longitude = data.get('longitude')
         poste.status = data.get('status')
@@ -110,11 +155,34 @@ def editar_poste(request, id):
         poste.save()
 
         return JsonResponse({
-            'message': 'Poste atualizado'
+            'status': 'Poste atualizado'
         })
 
     return JsonResponse({
         'error': 'Método inválido'
     }, status=400)
+
+@csrf_exempt
+def excluir_poste(request, id):
+    if request.method == "DELETE":
+        
+        try:
+        # pega poste
+            poste = Poste.objects.get(id=id)
+
+        except:
+        # verifica se existe
+            if poste.DoesNotExist: 
+                return JsonResponse({
+                    "error": "Poste não encontrado"
+                }, status=404)
+            
+        poste.delete()
+
+        return JsonResponse({"status": "Poste excluido!"},status=200)
+    
+    return JsonResponse({"error": "Método não permitido"}, status=405)
+    
+
     
 # Create your views here.

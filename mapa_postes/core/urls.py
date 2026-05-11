@@ -4,5 +4,6 @@ from . import views
 urlpatterns = [
     path('postes/', views.listar_postes),
     path('postes/criar/', views.criar_poste),
-    path('api/postes/<int:id>/',views.editar_poste),
+    path('postes/editar/<int:id>/',views.editar_poste),
+    path('postes/excluir/<int:id>/', views.excluir_poste),
 ]

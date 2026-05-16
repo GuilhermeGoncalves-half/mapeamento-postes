@@ -1,478 +1,373 @@
-// cria o mapa
-var map = L.map('map', {
-    minZoom: 13,
-    maxZoom: 18
-}).setView([-22.4735, -46.6317], 16);
+// ==========================
+// 🌍 MAPA GLOBAL
+// ==========================
 
-// controla modos
-let modoExclusao = false;
-let modoCriacao = false;
-let modoEdicao = false;
+// variável global do mapa (precisa ser global pra usar em outras funções)
+let map;
 
-// guarda coordenadas
+// array pra guardar todos os markers (útil depois pra manipular)
+let markers = [];
+
+
+// ==========================
+// 🎮 MODOS (controle de ação)
+// ==========================
+
+let modoExclusao = false; // quando true → pode excluir poste
+let modoCriacao = false;  // quando true → pode criar poste
+let modoEdicao = false;   // quando true → pode editar poste
+
+
+// ==========================
+// 📍 ESTADOS
+// ==========================
+
+// guarda coordenadas clicadas no mapa
 let latSelecionado = null;
 let lngSelecionado = null;
 
-// guarda id do poste editando
+// guarda IDs do backend
 let posteEditandoId = null;
-
-//guarda id do poste excluindo
 let posteExcluindoId = null;
 
-// guarda marker selecionado
+// guarda o marker selecionado (pra editar depois)
 let markerSelecionado = null;
 
-// ícone ativo
-const iconeAtivo = L.icon({
 
-    iconUrl: '/static/core/img/poste.png',
+// ==========================
+// 🎨 ÍCONES
+// ==========================
 
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32]
-});
+// função que escolhe o ícone com base no status do poste
+function pegarIcone(status) {
 
-// ícone manutenção
-const iconeManutencao = L.icon({
+  // se estiver ativo → ícone padrão
+  if (status === 'ativo') return '/static/core/img/poste.png';
 
-    iconUrl: '/static/core/img/poste-amarelo.svg',
+  // se estiver em manutenção → amarelo
+  if (status === 'manutencao') return '/static/core/img/poste-amarelo.svg';
 
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32]
-});
+  // se estiver desativado → vermelho
+  if (status === 'desativado') return '/static/core/img/poste-vermelho.svg';
 
-// ícone desativado
-const iconeDesativado = L.icon({
-
-    iconUrl: '/static/core/img/poste-vermelho.svg',
-
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32]
-});
-
-// escolhe ícone pelo status
-function pegarIcone(status){
-
-    if(status === 'ativo'){
-        return iconeAtivo;
-    }
-
-    if(status === 'manutencao'){
-        return iconeManutencao;
-    }
-
-    if(status === 'desativado'){
-        return iconeDesativado;
-    }
-
-    // padrão
-    return iconeAtivo;
+  // fallback (caso venha algo inesperado)
+  return '/static/core/img/poste.png';
 }
 
-// mapa base
-L.tileLayer(
-    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-{
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap'
-}).addTo(map);
 
-// busca postes
-fetch('api/postes/')
+// ==========================
+// 🚀 INIT MAP
+// ==========================
 
-.then(res => res.json())
+// função chamada automaticamente pelo Google Maps (via callback no script)
+function initMap() {
 
-.then(data => {
+  // define ponto inicial do mapa (São Paulo)
+  const center = { lat: -23.55, lng: -46.63 };
 
-    // percorre postes
-    data.forEach(p => {
+  // cria o mapa na div #map
+  map = new google.maps.Map(document.getElementById("map"), {
+    zoom: 13,        // nível de zoom
+    center: center,  // centro do mapa
+  });
 
-        // cria marker
-        const marker = L.marker(
-            [p.latitude, p.longitude],
-        {
-            icon: pegarIcone(p.status)
-        })
+  // evento de clique no mapa
+  map.addListener("click", (e) => {
 
-        // adiciona no mapa
-        .addTo(map)
+    scaledSize: new google.maps.Size(24, 24) // 🔽 tamanho
 
-        // popup
-        .bindPopup(`
-            <b>ID: ${p.id}</b><br>
-            Status: ${p.status}
-        `);
+    // só funciona se estiver no modo criação
+    if (!modoCriacao) return;
 
-        // click no marker
-        marker.on('click', () => {
+    // pega latitude e longitude do clique
+    latSelecionado = e.latLng.lat();
+    lngSelecionado = e.latLng.lng();
 
-            // só no modo edição ou exclusão
-            if (!modoEdicao && !modoExclusao) return;
+    // preenche os inputs do formulário
+    document.getElementById('latitude').value = latSelecionado;
+    document.getElementById('longitude').value = lngSelecionado;
 
-            if (modoEdicao){
-            
-            // salva marker
-            markerSelecionado = marker;
+    // abre modal de criação
+    abrirModal();
+  });
 
-            // salva id
-            posteEditandoId = p.id;
+  // carrega os postes do backend
+  carregarPostes();
+}
 
-            // preenche latitude
-            document.getElementById(
-                'latitude-edit'
-            ).value = p.latitude || '';
 
-            // preenche longitude
-            document.getElementById(
-                'longitude-edit'
-            ).value = p.longitude || '';
+// ==========================
+// 📡 CARREGAR POSTES
+// ==========================
 
-            // preenche status
-            document.getElementById(
-                'status-edit'
-            ).value = p.status || '';
+function carregarPostes() {
 
-            // preenche tipo
-            document.getElementById(
-                'tipo-edit'
-            ).value = p.tipo || '';
+  // chama sua API Django
+  fetch('/api/postes/')
+    .then(res => res.json())
+    .then(data => {
 
-            // preenche observação
-            document.getElementById(
-                'observacao-edit'
-            ).value = p.obs || '';
+      // percorre todos os postes retornados
+      data.forEach(p => {
 
-            // abre modal
-            abrirModalEdit();
-
-            }
-
-            if (modoExclusao){
-
-            // salva id
-            posteExcluindoId = p.id;
-
-            // abre modal
-            abrirModalExclusao();
-            }
+        // cria marker no mapa
+        const marker = new google.maps.Marker({
+          position: { lat: p.latitude, lng: p.longitude }, // posição
+          map: map, // em qual mapa vai aparecer
+          icon: pegarIcone(p.status) // ícone baseado no status
         });
 
+        // cria popup (InfoWindow)
+        const infoWindow = new google.maps.InfoWindow({
+          content: `
+            <b>ID: ${p.id}</b><br>
+            Status: ${p.status}
+          `
+        });
+
+        // evento de clique no marker
+        marker.addListener("click", () => {
+
+          // abre o popup
+          infoWindow.open(map, marker);
+
+          // se não estiver em modo edição nem exclusão → para aqui
+          if (!modoEdicao && !modoExclusao) return;
+
+          // ==========================
+          // ✏️ MODO EDIÇÃO
+          // ==========================
+          if (modoEdicao) {
+
+            // salva marker selecionado
+            markerSelecionado = marker;
+
+            // salva ID do poste
+            posteEditandoId = p.id;
+
+            // preenche formulário com dados atuais
+            document.getElementById('latitude-edit').value = p.latitude || '';
+            document.getElementById('longitude-edit').value = p.longitude || '';
+            document.getElementById('status-edit').value = p.status || '';
+            document.getElementById('tipo-edit').value = p.tipo || '';
+            document.getElementById('observacao-edit').value = p.obs || '';
+
+            // abre modal de edição
+            abrirModalEdit();
+          }
+
+          // ==========================
+          // ❌ MODO EXCLUSÃO
+          // ==========================
+          if (modoExclusao) {
+
+            // salva ID do poste
+            posteExcluindoId = p.id;
+
+            // abre modal de confirmação
+            abrirModalExclusao();
+          }
+        });
+
+        // guarda marker no array
+        markers.push(marker);
+      });
+
     });
+}
 
-});
 
-// corrige tamanho mapa
-setTimeout(() => {
-    map.invalidateSize();
-}, 100);
+// ==========================
+// 🪟 MODAIS
+// ==========================
 
-// abre modal criar
+// abre modal de criação
 function abrirModal() {
-
-    document.getElementById(
-        'modal'
-    ).style.display = 'block';
+  document.getElementById('modal').style.display = 'block';
 }
 
-// abre modal editar
+// abre modal de edição
 function abrirModalEdit() {
-
-    document.getElementById(
-        'modal-edit'
-    ).style.display = 'block';
+  document.getElementById('modal-edit').style.display = 'block';
 }
 
-// abre modal excluir
+// abre modal de exclusão
 function abrirModalExclusao() {
-
-    document.getElementById(
-        'modal-delete'
-    ).style.display = 'block';
+  document.getElementById('modal-delete').style.display = 'block';
 }
 
-// fecha modais
+// fecha todos os modais
 function fecharModal() {
 
-    document.getElementById(
-        'modal'
-    ).style.display = 'none';
+  document.getElementById('modal').style.display = 'none';
+  document.getElementById('modal-edit').style.display = 'none';
+  document.getElementById('modal-delete').style.display = 'none';
 
-    document.getElementById(
-        'modal-edit'
-    ).style.display = 'none';
-    document.getElementById(
-        'modal-delete'
-    ).style.display = 'none';
+  // desativa todos os modos
+  modoCriacao = false;
+  modoEdicao = false;
+  modoExclusao = false;
 
-    // desativa modos
-    modoCriacao = false;
-    modoEdicao = false;
-    modoExclusao = false;
+  // volta cursor normal
+  document.getElementById('map').style.cursor = 'default';
 
-    // cursor normal
-    document.getElementById(
-        'map'
-    ).style.cursor = 'default';
-
-    // verifica ações
-    verificacao();
+  verificacao();
 }
 
-// ativa criação
+
+// ==========================
+// 🎮 CONTROLE DE MODOS
+// ==========================
+
 function ativarModoCriacao() {
 
-    modoCriacao = true;
-    modoEdicao = false;
+  modoCriacao = true;
+  modoEdicao = false;
+  modoExclusao = false;
 
-    document.getElementById(
-        'info'
-    ).innerText =
+  document.getElementById('info').innerText =
     'Clique no mapa para criar um poste';
 
-    document.getElementById(
-        'map'
-    ).style.cursor = 'crosshair';
+  // muda cursor pra cruz (UX melhor)
+  document.getElementById('map').style.cursor = 'crosshair';
 }
 
-// verifica ações
-function verificacao(){
-
-    if(
-        modoEdicao === false &&
-        modoCriacao === false
-    ){
-
-        document.getElementById(
-            'info'
-        ).innerText =
-        'Nenhuma ação selecionada';
-    }
-}
-
-// ativa edição
 function ativarModoEdicao() {
 
-    modoEdicao = true;
-    modoCriacao = false;
+  modoEdicao = true;
+  modoCriacao = false;
+  modoExclusao = false;
 
-    document.getElementById(
-        'info'
-    ).innerText =
+  document.getElementById('info').innerText =
     'Clique em um poste para editar';
 }
 
-// ativa exclusao
-function ativarModoExclusao(){
+function ativarModoExclusao() {
 
-    modoExclusao = true;
-    modoEdicao = false;
-    modoCriacao = false;
+  modoExclusao = true;
+  modoCriacao = false;
+  modoEdicao = false;
 
-    document.getElementById(
-        'info'
-    ).innerText =
+  document.getElementById('info').innerText =
     'Clique em um poste para excluir';
-
 }
 
-// click mapa
-map.on('click', function(e) {
+// atualiza texto quando nenhum modo está ativo
+function verificacao() {
 
-    // só no modo criação
-    if (!modoCriacao) return;
+  if (!modoEdicao && !modoCriacao && !modoExclusao) {
+    document.getElementById('info').innerText =
+      'Nenhuma ação selecionada';
+  }
+}
 
-    // salva coordenadas
-    latSelecionado = e.latlng.lat;
-    lngSelecionado = e.latlng.lng;
 
-    // preenche latitude
-    document.getElementById(
-        'latitude'
-    ).value = latSelecionado;
+// ==========================
+// 💾 CRIAR POSTE
+// ==========================
 
-    // preenche longitude
-    document.getElementById(
-        'longitude'
-    ).value = lngSelecionado;
-
-    // abre modal
-    abrirModal();
-});
-
-// salva poste
 async function salvarPoste() {
 
-    // monta objeto
-    const dados = {
+  // monta objeto com dados do formulário
+  const dados = {
+    latitude: document.getElementById('latitude').value,
+    longitude: document.getElementById('longitude').value,
+    status: document.getElementById('status').value,
+    tipo: document.getElementById('tipo').value,
+    obs: document.getElementById('observacao').value
+  };
 
-        latitude:
-        document.getElementById(
-            'latitude'
-        ).value,
+  try {
 
-        longitude:
-        document.getElementById(
-            'longitude'
-        ).value,
+    // envia pro backend (Django)
+    const response = await fetch('/api/postes/criar/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dados)
+    });
 
-        status:
-        document.getElementById(
-            'status'
-        ).value,
+    const result = await response.json();
 
-        tipo:
-        document.getElementById(
-            'tipo'
-        ).value,
-
-        obs:
-        document.getElementById(
-            'observacao'
-        ).value
-    };
-
-    try {
-
-        // envia api
-        const response = await fetch('/api/postes/criar/', {
-
-            method: 'POST',
-
-            headers: {
-                'Content-Type': 'application/json'
-            },
-
-            body: JSON.stringify(dados)
-        })
-
-        // pega resposta json
-        const result = await response.json()
-
-        // verifica erro
-        if (!response.ok) {
-
-            document.getElementById('erro').innerText = result.error
-
-            return
-        }
-
-        // sucesso
-        alert('Poste criado com sucesso')
-
-        location.reload()
-
-    } catch (error) {
-
-        document.getElementById('erro').innerText =
-            'Erro ao conectar com o servidor'
-
-        console.error(error)
+    // se der erro
+    if (!response.ok) {
+      document.getElementById('erro').innerText = result.error;
+      return;
     }
+
+    // sucesso
+    alert('Poste criado com sucesso');
+
+    // recarrega página (pode melhorar depois)
+    location.reload();
+
+  } catch (error) {
+
+    document.getElementById('erro').innerText =
+      'Erro ao conectar com o servidor';
+  }
 }
 
-// salva edição
+
+// ==========================
+// ✏️ EDITAR POSTE
+// ==========================
+
 function salvarEdicao() {
 
-    // monta objeto
-    const dados = {
+  const dados = {
+    latitude: document.getElementById('latitude-edit').value,
+    longitude: document.getElementById('longitude-edit').value,
+    status: document.getElementById('status-edit').value,
+    tipo: document.getElementById('tipo-edit').value,
+    obs: document.getElementById('observacao-edit').value
+  };
 
-        latitude:
-        document.getElementById(
-            'latitude-edit'
-        ).value,
+  fetch(`/api/postes/editar/${posteEditandoId}/`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dados)
+  })
+  .then(() => {
 
-        longitude:
-        document.getElementById(
-            'longitude-edit'
-        ).value,
-
-        status:
-        document.getElementById(
-            'status-edit'
-        ).value,
-
-        tipo:
-        document.getElementById(
-            'tipo-edit'
-        ).value,
-
-        obs:
-        document.getElementById(
-            'observacao-edit'
-        ).value
-    };
-
-    // envia atualização
-    fetch(`/api/postes/editar/${posteEditandoId}/`, {
-
-        method: 'PUT',
-
-        headers: {
-            'Content-Type': 'application/json'
-        },
-
-        body: JSON.stringify(dados)
-    })
-
-    .then(() => {
-
-        // atualiza popup
-        markerSelecionado.bindPopup(`
-            <b>${dados.nome}</b><br>
-            Status: ${dados.status}
-        `);
-
-        // atualiza posição
-        markerSelecionado.setLatLng([
-            dados.latitude,
-            dados.longitude
-        ]);
-
-        // atualiza ícone
-        markerSelecionado.setIcon(
-            pegarIcone(dados.status)
-        );
-
-        // fecha modal
-        fecharModal();
+    // atualiza posição do marker no mapa
+    markerSelecionado.setPosition({
+      lat: parseFloat(dados.latitude),
+      lng: parseFloat(dados.longitude)
     });
+
+    // atualiza ícone
+    markerSelecionado.setIcon(pegarIcone(dados.status));
+
+    fecharModal();
+  });
 }
 
-async function excluirPoste(){
 
-    // envia exclusão
-    try{
+// ==========================
+// ❌ EXCLUIR POSTE
+// ==========================
 
-        // envia api
-        const response = await fetch(`/api/postes/excluir/${posteExcluindoId}/`,
-            {
-            method: 'DELETE'
-            }
-        )
+async function excluirPoste() {
 
-        //recebe o resultado
-        const result = await response.json()
+  try {
 
-        // erro
-        if(!response.ok){
+    const response = await fetch(`/api/postes/excluir/${posteExcluindoId}/`, {
+      method: 'DELETE'
+    });
 
-            // mostra o erro
-            document.getElementById('erro').innerText = result.error
+    const result = await response.json();
 
-            return
-        }
-
-        //sucesso
-        alert(result.status)
-
-        //recarrega o mapa
-        location.reload()
-
-    } catch (error){
-
-        return console.log(error)
-
+    if (!response.ok) {
+      document.getElementById('erro').innerText = result.error;
+      return;
     }
-    } 
+
+    alert(result.status);
+
+    // recarrega página
+    location.reload();
+
+  } catch (error) {
+    console.log(error);
+  }
+}

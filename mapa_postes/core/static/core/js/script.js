@@ -128,15 +128,16 @@ function carregarPostes() {
         // evento de clique no marker
         marker.addListener("click", () => {
 
+          modoEdicao = true;
+
+          if (modoExclusao){
+            modoEdicao = false;
+          }
+
           // abre o popup
           infoWindow.open(map, marker);
 
-          // se não estiver em modo edição nem exclusão → para aqui
-          if (!modoEdicao && !modoExclusao) return;
-
-          // ==========================
-          // ✏️ MODO EDIÇÃO
-          // ==========================
+          // modo edicao
           if (modoEdicao) {
 
             // salva marker selecionado
@@ -156,9 +157,7 @@ function carregarPostes() {
             abrirModalEdit();
           }
 
-          // ==========================
-          // ❌ MODO EXCLUSÃO
-          // ==========================
+          // modo exclusao
           if (modoExclusao) {
 
             // salva ID do poste
@@ -175,11 +174,6 @@ function carregarPostes() {
 
     });
 }
-
-
-// ==========================
-// 🪟 MODAIS
-// ==========================
 
 // abre modal de criação
 function abrirModal() {
@@ -213,11 +207,6 @@ function fecharModal() {
 
   verificacao();
 }
-
-
-// ==========================
-// 🎮 CONTROLE DE MODOS
-// ==========================
 
 function ativarModoCriacao() {
 
@@ -261,11 +250,6 @@ function verificacao() {
   }
 }
 
-
-// ==========================
-// 💾 CRIAR POSTE
-// ==========================
-
 async function salvarPoste() {
 
   // monta objeto com dados do formulário
@@ -307,11 +291,6 @@ async function salvarPoste() {
   }
 }
 
-
-// ==========================
-// ✏️ EDITAR POSTE
-// ==========================
-
 function salvarEdicao() {
 
   const dados = {
@@ -341,11 +320,6 @@ function salvarEdicao() {
     fecharModal();
   });
 }
-
-
-// ==========================
-// ❌ EXCLUIR POSTE
-// ==========================
 
 async function excluirPoste() {
 

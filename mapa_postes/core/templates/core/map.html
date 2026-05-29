@@ -38,6 +38,8 @@
     <!-- sidebar -->
     <div id="sidebar">
 
+
+        <div class="control">
         <h2>Controle</h2>
 
         <!-- botão criar -->
@@ -49,6 +51,17 @@
         <button onclick="ativarModoExclusao()">
             ❌ Excluir Poste
         </button>
+
+        </div>
+
+        <div class="filter">
+            <h2>FIltros</h2>
+
+            <h4>Postes</h4>
+            <button onclick="">Ativos</button>
+            <button onclick="">Manutenção</button>
+            <button onclick="">Desativado</button>
+        </div>
 
         <hr>
 
@@ -156,6 +169,33 @@
 
             <!-- salvar -->
             <button onclick="salvarPoste()">
+                Salvar
+            </button>
+
+            <!-- cancelar -->
+            <button onclick="fecharModal()">
+                Cancelar
+            </button>
+
+        </div>
+
+    </div>
+    <!-- modal obs da manutenção -->
+    <div id="modal-obs" class="modal">
+
+        <div class="modal-content">
+
+            <!-- observação -->
+            <textarea
+                id="observacao"
+                placeholder="Observação"
+            ></textarea>
+
+            <div id="sucesso"></div>
+            <div id="erro"></div>
+
+            <!-- salvar -->
+            <button onclick="salvarEdicao()">
                 Salvar
             </button>
 

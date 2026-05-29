@@ -190,12 +190,18 @@ function abrirModalExclusao() {
   document.getElementById('modal-delete').style.display = 'block';
 }
 
+// abre modal de observação da manutenção
+function abrirModalObs() {
+  document.getElementById('modal-obs').style.display = 'block';
+}
+
 // fecha todos os modais
 function fecharModal() {
 
   document.getElementById('modal').style.display = 'none';
   document.getElementById('modal-edit').style.display = 'none';
   document.getElementById('modal-delete').style.display = 'none';
+  document.getElementById('modal-obs').style.dispay = 'none';
 
   // desativa todos os modos
   modoCriacao = false;
@@ -213,6 +219,7 @@ function ativarModoCriacao() {
   modoCriacao = true;
   modoEdicao = false;
   modoExclusao = false;
+  modoObs = false;
 
   document.getElementById('info').innerText =
     'Clique no mapa para criar um poste';
@@ -226,6 +233,7 @@ function ativarModoEdicao() {
   modoEdicao = true;
   modoCriacao = false;
   modoExclusao = false;
+  modoObs = false
 
   document.getElementById('info').innerText =
     'Clique em um poste para editar';
@@ -236,6 +244,7 @@ function ativarModoExclusao() {
   modoExclusao = true;
   modoCriacao = false;
   modoEdicao = false;
+  modoObs = false;
 
   document.getElementById('info').innerText =
     'Clique em um poste para excluir';
@@ -244,7 +253,7 @@ function ativarModoExclusao() {
 // atualiza texto quando nenhum modo está ativo
 function verificacao() {
 
-  if (!modoEdicao && !modoCriacao && !modoExclusao) {
+  if (!modoEdicao && !modoCriacao && !modoExclusao && !modoObs) {
     document.getElementById('info').innerText =
       'Nenhuma ação selecionada';
   }
@@ -299,6 +308,12 @@ function salvarEdicao() {
     status: document.getElementById('status-edit').value,
     tipo: document.getElementById('tipo-edit').value,
     obs: document.getElementById('observacao-edit').value
+  };
+
+  if(dados.status === 'manutencao'){
+      document.getElementById('modal-edit').style.display = 'none';
+      abrirModalObs();
+      return;
   };
 
   fetch(`/api/postes/editar/${posteEditandoId}/`, {

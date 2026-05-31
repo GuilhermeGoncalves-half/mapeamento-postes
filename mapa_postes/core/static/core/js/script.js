@@ -219,7 +219,6 @@ function ativarModoCriacao() {
   modoCriacao = true;
   modoEdicao = false;
   modoExclusao = false;
-  modoObs = false;
 
   document.getElementById('info').innerText =
     'Clique no mapa para criar um poste';
@@ -233,7 +232,6 @@ function ativarModoEdicao() {
   modoEdicao = true;
   modoCriacao = false;
   modoExclusao = false;
-  modoObs = false
 
   document.getElementById('info').innerText =
     'Clique em um poste para editar';
@@ -244,7 +242,6 @@ function ativarModoExclusao() {
   modoExclusao = true;
   modoCriacao = false;
   modoEdicao = false;
-  modoObs = false;
 
   document.getElementById('info').innerText =
     'Clique em um poste para excluir';
@@ -253,7 +250,7 @@ function ativarModoExclusao() {
 // atualiza texto quando nenhum modo está ativo
 function verificacao() {
 
-  if (!modoEdicao && !modoCriacao && !modoExclusao && !modoObs) {
+  if (!modoEdicao && !modoCriacao && !modoExclusao) {
     document.getElementById('info').innerText =
       'Nenhuma ação selecionada';
   }
@@ -300,6 +297,25 @@ async function salvarPoste() {
   }
 }
 
+function salvarObs() {
+    const obs = document.getElementById('observacao-man').value;
+
+    fetch(`/api/postes/editar/obs/${posteEditandoId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            observacao: obs
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log(data);
+        fecharModal();
+    });
+}
+
 function salvarEdicao() {
 
   const dados = {
@@ -313,7 +329,6 @@ function salvarEdicao() {
   if(dados.status === 'manutencao'){
       document.getElementById('modal-edit').style.display = 'none';
       abrirModalObs();
-      return;
   };
 
   fetch(`/api/postes/editar/${posteEditandoId}/`, {

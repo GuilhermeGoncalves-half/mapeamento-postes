@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Poste
+from .models import Poste, ObservacaoManutencao
 from django.http import JsonResponse
 import json 
 from django.views.decorators.csrf import csrf_exempt
@@ -13,7 +13,6 @@ def validacao(request):
         latitude = data["latitude"]
         longitude = data["longitude"]
         status = data["status"]
-        obs = data["obs"]
         tipo = data["tipo"]
         
         # valida status
@@ -161,6 +160,40 @@ def editar_poste(request, id):
     return JsonResponse({
         'error': 'Método inválido'
     }, status=400)
+
+def obs_poste(request, id):
+    if request.method != "POST":
+        return JsonResponse(
+            {"error": "Método não permitido"},
+            status=405
+        )
+
+    try:
+        poste = Poste.objects.get(id=id)
+    except Poste.DoesNotExist:
+        return JsonResponse(
+            {"error": "Poste não encontrado"},
+            status=404
+        )
+
+    data = json.loads(request.body)
+
+    observacao = data.get("observacao")
+
+    if not observacao:
+        return JsonResponse(
+            {"error": "Observação obrigatória"},
+            status=400
+        )
+
+    ObservacaoManutencao.objects.create(
+        poste=poste,
+        observacao=observacao
+    )
+
+    return JsonResponse({
+        "status": "Observação salva com sucesso"
+    })
 
 @csrf_exempt
 def excluir_poste(request, id):

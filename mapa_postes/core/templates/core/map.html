@@ -29,6 +29,17 @@
 
 <body>
 
+    <!-- mapa -->
+    <div id="map"></div>
+
+    <!-- js -->
+   
+    <script src="{% static 'core/js/icones.js' %}"></script>
+    <script src="{% static 'core/js/modos.js' %}"></script>
+    <script src="{% static 'core/js/modais.js' %}"></script>
+    <script src="{% static 'core/js/api.js' %}"></script>
+    <script src="{% static 'core/js/map.js' %}"></script>
+
     <!-- google maps js -->
     <script 
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAfAh0TjggYA2H8tsf-Ygw4IESX-jPPafs&callback=initMap" 
@@ -156,13 +167,7 @@
                 Splitter
             </option>
 
-        </select>
-
-            <!-- observação -->
-            <textarea
-                id="observacao"
-                placeholder="Observação"
-            ></textarea>
+            </select>
 
             <div id="sucesso"></div>
             <div id="erro"></div>
@@ -290,12 +295,6 @@
 
         </select>
 
-            <!-- observação -->
-            <textarea
-                id="observacao-edit"
-                placeholder="Observação"
-            ></textarea>
-
             <!-- salvar -->
             <button onclick="salvarEdicao()">
                 Salvar
@@ -327,11 +326,7 @@
         </div>
     </div>
 
-    <!-- mapa -->
-    <div id="map"></div>
-
-    <!-- js -->
-    <script src="{% static 'core/js/script.js' %}"></script>
+    
 
 </body>
 </html>

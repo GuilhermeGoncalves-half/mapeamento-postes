@@ -161,6 +161,7 @@ def editar_poste(request, id):
         'error': 'Método inválido'
     }, status=400)
 
+@csrf_exempt
 def obs_poste(request, id):
     if request.method != "POST":
         return JsonResponse(

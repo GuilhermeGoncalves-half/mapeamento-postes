@@ -11,34 +11,30 @@ def validacao(request):
         
         # atribuindo variáveis aos dados
         latitude = data["latitude"]
-        longitude = data["longitude"]
-        status = data["status"]
-        tipo = data["tipo"]
-        
+        longitude = data.get('longitude', 'undefined')
+        status = data.get('status', 'undefined')
+        tipo = data.get('tipo', 'undefined')
+
         # valida status
         if not status:
-
             return JsonResponse({
             "error": "Status obrigatório"
             }, status=400)
             
         # valida tipo
         if not tipo:
-
             return JsonResponse({
             "error": "Tipo obrigatório"
             }, status=400)
 
         # valida latitude
         if latitude is None:
-
             return JsonResponse({
                 'error': 'Latitude obrigatória'
             }, status=400)
 
         # valida longitude
         if longitude is None:
-
             return JsonResponse({
                 'error': 'Longitude obrigatória'
             }, status=400)
@@ -70,6 +66,18 @@ def validacao(request):
                 "error": "Longitude deve estar entre -180 e 180"
             },status=400)
 
+def validacao_obs(request):
+    data = json.loads(request.body)
+
+    observacao = data.get("observacao-man")
+
+    if not observacao:
+        return JsonResponse(
+            {"error": "Observação obrigatória"},
+            status=400
+    )
+
+    return None
 
 def listar_postes(request):
     postes = list(Poste.objects.values())
@@ -95,7 +103,7 @@ def criar_poste(request):
         tipo = data["tipo"]
 
         # cria o poste
-        poste = Poste.objects.create(
+        Poste.objects.create(
             latitude=latitude,
             longitude=longitude,
             status=status,
@@ -125,12 +133,10 @@ def editar_poste(request, id):
         # pega poste
             poste = Poste.objects.get(id=id)
 
-        except:
-        # verifica se existe
-            if poste.DoesNotExist: 
-                return JsonResponse({
-                    "error": "Poste não encontrado"
-                }, status=404)
+        except poste.DoesNotExist:
+            return JsonResponse({
+                "error": "Poste não encontrado"
+            }, status=404)
             
 
         # pega json enviado
@@ -155,38 +161,39 @@ def editar_poste(request, id):
 
 @csrf_exempt
 def obs_poste(request, id):
-    if request.method != "POST":
-        return JsonResponse(
+    if request.method == "POST": 
+
+        erro = validacao_obs(request)
+
+        if erro:
+            return erro    
+        
+        data = json.loads(request.body)
+
+        print(data)
+
+        observacao = data.get("observacao-man")
+
+        try:
+            poste = Poste.objects.get(id=id)
+        except Poste.DoesNotExist:
+            return JsonResponse(
+                {"error": "Poste não encontrado"},
+                status=404
+        )
+        ObservacaoManutencao.objects.create(
+            poste=poste,
+            observacao=observacao
+        )
+
+        return JsonResponse({
+            "status": "Observação salva com sucesso"
+        })
+    
+    return JsonResponse(
             {"error": "Método não permitido"},
             status=405
         )
-
-    try:
-        poste = Poste.objects.get(id=id)
-    except Poste.DoesNotExist:
-        return JsonResponse(
-            {"error": "Poste não encontrado"},
-            status=404
-        )
-
-    data = json.loads(request.body)
-
-    observacao = data.get("observacao")
-
-    if not observacao:
-        return JsonResponse(
-            {"error": "Observação obrigatória"},
-            status=400
-        )
-
-    ObservacaoManutencao.objects.create(
-        poste=poste,
-        observacao=observacao
-    )
-
-    return JsonResponse({
-        "status": "Observação salva com sucesso"
-    })
 
 @csrf_exempt
 def excluir_poste(request, id):

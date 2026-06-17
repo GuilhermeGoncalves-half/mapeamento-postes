@@ -45,26 +45,45 @@ async function salvarPoste() {
   }
 }
 
-function salvarObs() {
+async function salvarObs() {
     const obs = document.getElementById('observacao-man').value;
 
-    fetch(`/api/postes/obs/${posteEditandoId}/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            observacao: obs
-        })
+    try {
+    const response = await fetch(`/api/postes/obs/${posteEditandoId}/`, {
+      method: 'POST',
+      headers: 
+      { 
+        'Content-Type': 'application/json' 
+      },
+      body: JSON.stringify({
+        "observacao-man": obs
     })
-    .then(res => res.json())
-    .then(data => {
-        fecharModal();
-        location.reload();
     });
+
+    const result = await response.json();
+
+    // se der erro
+    if (!response.ok) {
+      document.getElementById('erro').innerText = result.error;
+      return;
+    }
+
+    // sucesso
+    alert('Observação da manutenção criada com sucesso');
+
+    await salvarEdicao();
+
+    // recarrega página (pode melhorar depois)
+    location.reload();
+}
+    catch(error){
+      document.getElementById('erro').innerText =
+      'Erro ao conectar com o servidor';
+    }
+  
 }
 
-function salvarEdicao() {
+async function salvarEdicao() {
 
   const dados = {
     latitude: document.getElementById('latitude-edit').value,
@@ -73,30 +92,29 @@ function salvarEdicao() {
     tipo: document.getElementById('tipo-edit').value,
   };
 
-  if(dados.status === 'manutencao'){
-      document.getElementById('modal-edit').style.display = 'none';
-      abrirModalObs();
-      return;   
-  };
+  console.log("SALVANDO EDIÇÃO");
 
-  fetch(`/api/postes/editar/${posteEditandoId}/`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(dados)
-  })
-  .then(() => {
+  const response = await fetch(
+    `/api/postes/editar/${posteEditandoId}/`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dados)
+    }
+  );
 
-    // atualiza posição do marker no mapa
-    markerSelecionado.setPosition({
-      lat: parseFloat(dados.latitude),
-      lng: parseFloat(dados.longitude)
-    });
-
-    // atualiza ícone
-    markerSelecionado.setIcon(pegarIcone(dados.status));
-
-    fecharModal();
+  // atualiza posição do marker no mapa
+  markerSelecionado.setPosition({
+    lat: parseFloat(dados.latitude),
+    lng: parseFloat(dados.longitude)
   });
+
+  // atualiza ícone
+  markerSelecionado.setIcon(pegarIcone(dados.status));
+
+  fecharModal();
+
+  return response;
 }
 
 async function excluirPoste() {

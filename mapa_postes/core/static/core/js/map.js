@@ -97,7 +97,6 @@ function carregarPostes() {
             document.getElementById('longitude-edit').value = p.longitude || '';
             document.getElementById('status-edit').value = p.status || '';
             document.getElementById('tipo-edit').value = p.tipo || '';
-            document.getElementById('observacao-edit').value = p.obs || '';
 
             // abre modal de edição
             abrirModalEdit();

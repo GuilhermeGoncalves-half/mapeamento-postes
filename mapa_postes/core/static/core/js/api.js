@@ -13,7 +13,6 @@ async function salvarPoste() {
     longitude: document.getElementById('longitude').value,
     status: document.getElementById('status').value,
     tipo: document.getElementById('tipo').value,
-    obs: document.getElementById('observacao').value
   };
 
   try {
@@ -72,7 +71,6 @@ function salvarEdicao() {
     longitude: document.getElementById('longitude-edit').value,
     status: document.getElementById('status-edit').value,
     tipo: document.getElementById('tipo-edit').value,
-    obs: document.getElementById('observacao-edit').value
   };
 
   if(dados.status === 'manutencao'){

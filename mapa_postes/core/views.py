@@ -92,7 +92,6 @@ def criar_poste(request):
         latitude = data["latitude"]
         longitude = data["longitude"]
         status = data["status"]
-        obs = data["obs"]
         tipo = data["tipo"]
 
         # cria o poste
@@ -100,7 +99,6 @@ def criar_poste(request):
             latitude=latitude,
             longitude=longitude,
             status=status,
-            obs=obs,
             tipo=tipo
         )
 
@@ -138,17 +136,11 @@ def editar_poste(request, id):
         # pega json enviado
         data = json.loads(request.body)
 
-        latitude = data["latitude"]
-        longitude = data["longitude"]
-        status = data["status"]
-        tipo = data["tipo"]
-
         # atualiza campos
         poste.latitude = data.get('latitude')
         poste.longitude = data.get('longitude')
         poste.status = data.get('status')
         poste.tipo = data.get('tipo')
-        poste.obs = data.get('obs')
 
         # salva no banco
         poste.save()

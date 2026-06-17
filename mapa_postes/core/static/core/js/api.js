@@ -92,8 +92,6 @@ async function salvarEdicao() {
     tipo: document.getElementById('tipo-edit').value,
   };
 
-  console.log("SALVANDO EDIÇÃO");
-
   const response = await fetch(
     `/api/postes/editar/${posteEditandoId}/`,
     {
@@ -103,17 +101,13 @@ async function salvarEdicao() {
     }
   );
 
-  // atualiza posição do marker no mapa
-  markerSelecionado.setPosition({
-    lat: parseFloat(dados.latitude),
-    lng: parseFloat(dados.longitude)
-  });
-
-  // atualiza ícone
-  markerSelecionado.setIcon(pegarIcone(dados.status));
+  if(dados.status === 'manutencao'){
+    document.getElementById('modal-edit').style.display = 'none';
+    abrirModalObs();
+    return;
+  }
 
   fecharModal();
-
   return response;
 }
 

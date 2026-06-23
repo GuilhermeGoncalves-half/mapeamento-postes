@@ -1,7 +1,6 @@
 from django.db import models
 
 class Poste(models.Model):
-    nome = models.CharField(max_length=100)
     latitude = models.FloatField()
     longitude = models.FloatField()
     status = models.CharField(max_length=11)

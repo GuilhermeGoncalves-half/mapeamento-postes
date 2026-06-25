@@ -23,6 +23,186 @@ body{
     z-index: 1;
 }
 
+/* sidebar */
+#sidebar{
+    width: 280px;
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 25px;
+
+    background: #dff7f3;
+
+    border-right: 1px solid #c7ebe5;
+
+    box-shadow: 4px 0 15px rgba(0,0,0,0.08);
+
+    overflow: hidden;
+
+    /* animação de colapso lateral */
+    transition:
+        width 0.3s ease,
+        padding 0.3s ease,
+        opacity 0.3s ease;
+}
+
+/* sidebar colapsada */
+#sidebar.sidebar-collapsed{
+    width: 0;
+    padding: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* botão abrir sidebar (fica flutuando no mapa) */
+#sidebar-open-btn{
+    position: fixed;
+
+    top: 18px;
+    right: 12px;
+
+    width: 42px;
+    height: 42px;
+
+    padding: 0;
+    margin: 0;
+
+    border: none;
+    border-radius: 10px;
+
+    background: #52b7a8;
+
+    color: white;
+
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 1;
+
+    cursor: pointer;
+
+    z-index: 1000;
+
+    box-shadow: 0 4px 12px rgba(82, 183, 168, 0.4);
+
+    /* escondido por padrão */
+    opacity: 0;
+    pointer-events: none;
+
+    transition:
+        opacity 0.3s ease,
+        transform 0.2s ease,
+        background 0.2s ease;
+}
+
+#sidebar-open-btn.visible{
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#sidebar-open-btn:hover{
+    background: #469f92;
+    transform: scale(1.08);
+}
+
+/* botão fechar sidebar (fica dentro da sidebar) */
+#sidebar-close-btn{
+    width: auto;
+    align-self: flex-end;
+
+    padding: 5px 10px;
+    margin-bottom: 10px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: #3f6f69;
+
+    font-size: 16px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow: none;
+
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+#sidebar-close-btn:hover{
+    background: #c7ebe5;
+    color: #255b55;
+    transform: none;
+    box-shadow: none;
+}
+
+#sidebar-close-btn:active{
+    transform: scale(0.96);
+}
+
+/* ---- botão toggle "Controle" ---- */
+.controle-toggle-btn{
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 0 10px 0;
+    margin-bottom: 0;
+
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid #b8ddd7;
+    border-radius: 0;
+
+    color: #255b55;
+
+    font-size: 24px;
+    font-weight: bold;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+
+    cursor: pointer;
+
+    box-shadow: none;
+
+    transition: color 0.2s ease;
+}
+
+.controle-toggle-btn:hover{
+    background: transparent;
+    transform: none;
+    box-shadow: none;
+    color: #1a4540;
+}
+
+.controle-toggle-btn:active{
+    transform: none;
+}
+
+/* seta indicadora */
+.controle-arrow{
+    font-size: 13px;
+    color: #52b7a8;
+    transition: transform 0.25s ease;
+    line-height: 1;
+}
+
+/* conteúdo colapsável da seção controle */
+.controle-content{
+    overflow: hidden;
+    max-height: 500px;    /* valor alto; será sobrescrito por JS */
+    opacity: 1;
+
+    transition:
+        max-height 0.3s ease,
+        opacity 0.25s ease;
+
+    padding-top: 18px;
+}
+
 /* título */
 #sidebar h2{
     margin-bottom: 25px;
@@ -49,7 +229,7 @@ body{
     line-height: 1.5;
 }
 
-/* botões */
+/* botões gerais */
 button{
     width: 100%;
 
@@ -293,22 +473,6 @@ button:active{
 .footer p{
     margin: 0;
     font-size: 13px;
-}
-
-#sidebar{
-    width: 280px;
-    height: 100vh;
-
-    display: flex;
-    flex-direction: column;
-
-    padding: 25px;
-
-    background: #dff7f3;
-
-    border-right: 1px solid #c7ebe5;
-
-    box-shadow: 4px 0 15px rgba(0,0,0,0.08);
 }
 
 .sidebar-footer{

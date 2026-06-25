@@ -46,35 +46,57 @@
     async defer>
     </script>
 
+    <!-- botão para abrir/fechar sidebar (aparece quando sidebar está fechada) -->
+    <button id="sidebar-open-btn" onclick="toggleSidebar()" title="Abrir painel">
+        ☰
+    </button>
+
     <!-- sidebar -->
     <div id="sidebar">
 
+        <!-- botão fechar sidebar -->
+        <button id="sidebar-close-btn" onclick="toggleSidebar()" title="Fechar painel">
+            ✕
+        </button>
 
         <div class="control">
-        <h2>Controle</h2>
 
-        <!-- botão criar -->
-        <button onclick="ativarModoCriacao()">
-            ➕ Adicionar Poste
-        </button>
+            <!-- título vira botão de colapso -->
+            <button id="controle-toggle" class="controle-toggle-btn" onclick="toggleControle()">
+                <span>Controle</span>
+                <span id="controle-arrow" class="controle-arrow">▲</span>
+            </button>
 
-        <!-- botão excluir -->
-        <button onclick="ativarModoExclusao()">
-            ❌ Excluir Poste
-        </button>
+            <!-- conteúdo colapsável -->
+            <div id="controle-content" class="controle-content">
+
+                <!-- botão criar -->
+                <button onclick="ativarModoCriacao()">
+                    ➕ Adicionar Poste
+                </button>
+
+                <!-- botão excluir -->
+                <button onclick="ativarModoExclusao()">
+                    ❌ Excluir Poste
+                </button>
+
+                <hr>
+
+                <!-- informações -->
+                <div id="info">
+                    Nenhuma ação selecionada
+                </div>
+
+            </div>
 
         </div>
-        
-        <hr>
 
-        <!-- informações -->
-        <div id="info">
-            Nenhuma ação selecionada
-        </div>
         <div class="sidebar-footer">
             <p>© 2026 Sistema de Gestão de Postes</p>
             <p>Todos os direitos reservados.</p>
         </div>
+
+    </div>
 
     <!-- modal criar -->
     <div id="modal" class="modal">
@@ -317,7 +339,42 @@
         </button>
 
         </div>
-    </div>    
+    </div>
+
+    <script>
+        /* --- toggle sidebar inteira --- */
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const openBtn = document.getElementById('sidebar-open-btn');
+            sidebar.classList.toggle('sidebar-collapsed');
+            openBtn.classList.toggle('visible');
+        }
+
+        /* --- toggle seção controle --- */
+        let controleAberto = true;
+
+        function toggleControle() {
+            const content = document.getElementById('controle-content');
+            const arrow   = document.getElementById('controle-arrow');
+            controleAberto = !controleAberto;
+
+            if (controleAberto) {
+                content.style.maxHeight = content.scrollHeight + 'px';
+                content.style.opacity   = '1';
+                arrow.textContent       = '▲';
+            } else {
+                content.style.maxHeight = '0';
+                content.style.opacity   = '0';
+                arrow.textContent       = '▼';
+            }
+        }
+
+        /* inicializa altura do conteúdo para a animação funcionar */
+        window.addEventListener('DOMContentLoaded', () => {
+            const content = document.getElementById('controle-content');
+            content.style.maxHeight = content.scrollHeight + 'px';
+        });
+    </script>
 
 </body>
 </html>

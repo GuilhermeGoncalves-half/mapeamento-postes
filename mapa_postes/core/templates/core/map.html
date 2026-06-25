@@ -1,378 +1,241 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Mapa</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PosteMap</title>
 
     {% load static %}
 
-    <!-- css -->
-    <link
-        rel="stylesheet"
-        href="{% static 'core/css/style.css' %}"
-    >
-
-    <!-- leaflet -->
-    <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    >
-
+    <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
-
 <body>
 
-    <!-- mapa -->
     <div id="map"></div>
 
-    <!-- js -->
     <script src="{% static 'core/js/api.js' %}"></script>
     <script src="{% static 'core/js/icones.js' %}"></script>
     <script src="{% static 'core/js/modos.js' %}"></script>
     <script src="{% static 'core/js/modais.js' %}"></script>
-    
     <script src="{% static 'core/js/map.js' %}"></script>
 
-    <!-- google maps js -->
-    <script 
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAfAh0TjggYA2H8tsf-Ygw4IESX-jPPafs&callback=initMap" 
-    async defer>
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAfAh0TjggYA2H8tsf-Ygw4IESX-jPPafs&callback=initMap"
+        async defer>
     </script>
 
-    <!-- botão para abrir/fechar sidebar (aparece quando sidebar está fechada) -->
-    <button id="sidebar-open-btn" onclick="toggleSidebar()" title="Abrir painel">
-        ☰
+    <!-- botão flutuante abrir -->
+    <button id="sidebar-open-btn" onclick="toggleSidebar()" title="Abrir painel" aria-label="Abrir painel">
+        <svg width="15" height="12" viewBox="0 0 15 12" fill="none">
+            <rect y="0"   width="15" height="1.5" rx=".75" fill="currentColor"/>
+            <rect y="5"   width="15" height="1.5" rx=".75" fill="currentColor"/>
+            <rect y="10"  width="15" height="1.5" rx=".75" fill="currentColor"/>
+        </svg>
     </button>
 
     <!-- sidebar -->
     <div id="sidebar">
 
-        <!-- botão fechar sidebar -->
-        <button id="sidebar-close-btn" onclick="toggleSidebar()" title="Fechar painel">
-            ✕
-        </button>
-
-        <div class="control">
-
-            <!-- título vira botão de colapso -->
-            <button id="controle-toggle" class="controle-toggle-btn" onclick="toggleControle()">
-                <span>Controle</span>
-                <span id="controle-arrow" class="controle-arrow">▲</span>
-            </button>
-
-            <!-- conteúdo colapsável -->
-            <div id="controle-content" class="controle-content">
-
-                <!-- botão criar -->
-                <button onclick="ativarModoCriacao()">
-                    ➕ Adicionar Poste
-                </button>
-
-                <!-- botão excluir -->
-                <button onclick="ativarModoExclusao()">
-                    ❌ Excluir Poste
-                </button>
-
-                <hr>
-
-                <!-- informações -->
-                <div id="info">
-                    Nenhuma ação selecionada
+        <div class="sidebar-header">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
+                        <rect x="6.5" y="5" width="2.2" height="12" rx="1.1" fill="#8aab96"/>
+                        <rect x="5.5" y="2" width="8" height="2" rx="1" fill="#546b5c"/>
+                        <circle cx="13.5" cy="1.8" r="1.8" fill="#8aab96" opacity=".8"/>
+                        <line x1="7.5" y1="3" x2="13.5" y2="3" stroke="#546b5c" stroke-width="1.1" stroke-linecap="round"/>
+                        <rect x="5" y="17" width="5.5" height="1.5" rx=".75" fill="#546b5c"/>
+                    </svg>
                 </div>
+                <div class="brand-text">
+                    <span class="brand-name">PosteMap</span>
+                    <span class="brand-sub">Gestão de rede</span>
+                </div>
+            </div>
+            <button class="btn-icon-sm" onclick="toggleSidebar()" title="Fechar painel" aria-label="Fechar painel">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            </button>
+        </div>
 
+        <div class="sidebar-body">
+
+            <div class="section">
+                <button class="section-header" onclick="toggleSection(this)" aria-expanded="true">
+                    <span class="section-label">Ações</span>
+                    <span class="section-chevron open">▼</span>
+                </button>
+
+                <div class="section-content">
+
+                    <button class="btn-action btn-primary" onclick="ativarModoCriacao()">
+                        <span class="action-icon">
+                            <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                                <path d="M5.5 1v9M1 5.5h9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                            </svg>
+                        </span>
+                        Adicionar poste
+                    </button>
+
+                    <button class="btn-action btn-danger" onclick="ativarModoExclusao()">
+                        <span class="action-icon">
+                            <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                                <path d="M1.5 1.5l8 8M9.5 1.5l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                            </svg>
+                        </span>
+                        Excluir poste
+                    </button>
+
+                    <div style="height:8px;"></div>
+
+                    <div class="status-card">
+                        <div class="status-dot" id="status-dot"></div>
+                        <div id="info">Nenhuma ação selecionada</div>
+                    </div>
+
+                </div>
             </div>
 
         </div>
 
         <div class="sidebar-footer">
-            <p>© 2026 Sistema de Gestão de Postes</p>
-            <p>Todos os direitos reservados.</p>
+            <div class="footer-status">
+                <div class="footer-pulse"></div>
+                <span class="footer-label">online</span>
+            </div>
+            <span class="footer-copy">© 2026</span>
         </div>
 
     </div>
 
     <!-- modal criar -->
     <div id="modal" class="modal">
-
         <div class="modal-content">
-
-            <h2>Novo Poste</h2>
-
-            <!-- latitude -->
-            <input
-                type="text"
-                id="latitude"
-                placeholder="Latitude"
-            >
-
-            <!-- longitude -->
-            <input
-                type="text"
-                id="longitude"
-                placeholder="Longitude"
-            >
-
-            <!-- status -->
+            <h2>Novo poste</h2>
+            <input type="text" id="latitude"  placeholder="Latitude">
+            <input type="text" id="longitude" placeholder="Longitude">
             <select id="status">
-
-            <option value="">
-                Selecione o status
-            </option>
-
-            <option value="ativo">
-                Ativo
-            </option>
-
-            <option value="manutencao">
-                Manutenção
-            </option>
-
-            <option value="desativado">
-                Desativado
-            </option>
-
+                <option value="">Status</option>
+                <option value="ativo">Ativo</option>
+                <option value="manutencao">Manutenção</option>
+                <option value="desativado">Desativado</option>
             </select>
-
             <select id="tipo">
-
-            <option value="">
-                Selecione o tipo
-            </option>
-
-            <option value="backbone">
-                Backbone
-            </option>
-
-            <option value="distribuicao">
-                Distribuição
-            </option>
-
-            <option value="cto">
-                CTO
-            </option>
-
-            <option value="atendimento">
-                Atendimento
-            </option>
-
-            <option value="derivacao">
-                Derivação
-            </option>
-
-            <option value="passagem">
-                Passagem
-            </option>
-
-            <option value="reserva">
-                Reserva
-            </option>
-
-            <option value="emenda">
-                Emenda
-            </option>
-
-            <option value="splitter">
-                Splitter
-            </option>
-
+                <option value="">Tipo</option>
+                <option value="backbone">Backbone</option>
+                <option value="distribuicao">Distribuição</option>
+                <option value="cto">CTO</option>
+                <option value="atendimento">Atendimento</option>
+                <option value="derivacao">Derivação</option>
+                <option value="passagem">Passagem</option>
+                <option value="reserva">Reserva</option>
+                <option value="emenda">Emenda</option>
+                <option value="splitter">Splitter</option>
             </select>
-
             <div id="sucesso"></div>
             <div id="erro"></div>
-
-            <!-- salvar -->
-            <button onclick="salvarPoste()">
-                Salvar
-            </button>
-
-            <!-- cancelar -->
-            <button onclick="fecharModal()">
+            <button onclick="salvarPoste()">Salvar</button>
+            <button onclick="fecharModal()"
+                style="background:transparent; color:var(--text-muted); border-color:var(--border);">
                 Cancelar
             </button>
-
         </div>
-
     </div>
-    <!-- modal obs da manutenção -->
+
+    <!-- modal obs -->
     <div id="modal-obs" class="modal">
-
         <div class="modal-content">
-
-            <!-- observação da manutenção -->
-            <textarea
-                id="observacao-man"
-                placeholder="Especifique o motivo de manutenção do poste."
-            ></textarea>
-
+            <h2>Observação de manutenção</h2>
+            <textarea id="observacao-man" placeholder="Descreva o motivo da manutenção…"></textarea>
             <div id="sucesso"></div>
             <div id="erro"></div>
-
-            <!-- salvar -->
-            <button onclick="salvarObs()">
-                Salvar
-            </button>
-
-            <!-- cancelar -->
-            <button onclick="fecharModal()">
+            <button onclick="salvarObs()">Salvar</button>
+            <button onclick="fecharModal()"
+                style="background:transparent; color:var(--text-muted); border-color:var(--border);">
                 Cancelar
             </button>
-
         </div>
-
     </div>
 
     <!-- modal editar -->
     <div id="modal-edit" class="modal">
-
         <div class="modal-content">
-
-            <h2>Editar Poste</h2>
-
-            <!-- latitude -->
-            <input
-                type="text"
-                id="latitude-edit"
-                placeholder="Latitude"
-            >
-
-            <!-- longitude -->
-            <input
-                type="text"
-                id="longitude-edit"
-                placeholder="Longitude"
-            >
-
-            <!-- status -->
+            <h2>Editar poste</h2>
+            <input type="text" id="latitude-edit"  placeholder="Latitude">
+            <input type="text" id="longitude-edit" placeholder="Longitude">
             <select id="status-edit">
-
-            <option value="ativo">
-                Ativo
-            </option>
-
-            <option value="manutencao">
-                Manutenção
-            </option>
-
-            <option value="desativado">
-                Desativado
-            </option>
-
+                <option value="ativo">Ativo</option>
+                <option value="manutencao">Manutenção</option>
+                <option value="desativado">Desativado</option>
             </select>
-
             <select id="tipo-edit">
-
-            <option value="">
-                Selecione o tipo
-            </option>
-
-            <option value="backbone">
-                Backbone
-            </option>
-
-            <option value="distribuicao">
-                Distribuição
-            </option>
-
-            <option value="cto">
-                CTO
-            </option>
-
-            <option value="atendimento">
-                Atendimento
-            </option>
-
-            <option value="derivacao">
-                Derivação
-            </option>
-
-            <option value="passagem">
-                Passagem
-            </option>
-
-            <option value="reserva">
-                Reserva
-            </option>
-
-            <option value="emenda">
-                Emenda
-            </option>
-
-            <option value="splitter">
-                Splitter
-            </option>
-
-        </select>
-
-            <!-- salvar -->
-            <button onclick="salvarEdicao()">
-                Salvar
-            </button>
-
-            <!-- cancelar -->
-            <button onclick="fecharModal()">
+                <option value="">Tipo</option>
+                <option value="backbone">Backbone</option>
+                <option value="distribuicao">Distribuição</option>
+                <option value="cto">CTO</option>
+                <option value="atendimento">Atendimento</option>
+                <option value="derivacao">Derivação</option>
+                <option value="passagem">Passagem</option>
+                <option value="reserva">Reserva</option>
+                <option value="emenda">Emenda</option>
+                <option value="splitter">Splitter</option>
+            </select>
+            <button onclick="salvarEdicao()">Salvar</button>
+            <button onclick="fecharModal()"
+                style="background:transparent; color:var(--text-muted); border-color:var(--border);">
                 Cancelar
             </button>
-
         </div>
-
     </div>
 
+    <!-- modal deletar -->
     <div id="modal-delete" class="modal">
         <div class="modal-content">
-        <h2>Deseja realmente apagar este poste?</h2>
-
-        <!-- excluir -->
-        <button onclick="excluirPoste()">
-            Excluir
-        </button>
-
-        <!-- cancelar -->
-        <button onclick="fecharModal()">
-            Cancelar
-        </button>
-
+            <h2>Apagar este poste?</h2>
+            <p style="font-size:12px; color:var(--text-muted); text-align:center; margin-bottom:18px; line-height:1.55; font-family:var(--font-mono);">
+                Esta ação não pode ser desfeita.
+            </p>
+            <button onclick="excluirPoste()"
+                style="background:var(--danger-dim); color:var(--danger); border-color:var(--danger-border);">
+                Excluir
+            </button>
+            <button onclick="fecharModal()"
+                style="background:transparent; color:var(--text-muted); border-color:var(--border);">
+                Cancelar
+            </button>
         </div>
     </div>
 
     <script>
-        /* --- toggle sidebar inteira --- */
         function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const openBtn = document.getElementById('sidebar-open-btn');
-            sidebar.classList.toggle('sidebar-collapsed');
-            openBtn.classList.toggle('visible');
+            document.getElementById('sidebar').classList.toggle('sidebar-collapsed');
+            document.getElementById('sidebar-open-btn').classList.toggle('visible');
         }
 
-        /* --- toggle seção controle --- */
-        let controleAberto = true;
-
-        function toggleControle() {
-            const content = document.getElementById('controle-content');
-            const arrow   = document.getElementById('controle-arrow');
-            controleAberto = !controleAberto;
-
-            if (controleAberto) {
-                content.style.maxHeight = content.scrollHeight + 'px';
-                content.style.opacity   = '1';
-                arrow.textContent       = '▲';
-            } else {
+        function toggleSection(btn) {
+            const content = btn.nextElementSibling;
+            const chevron = btn.querySelector('.section-chevron');
+            const isOpen  = chevron.classList.contains('open');
+            if (isOpen) {
                 content.style.maxHeight = '0';
                 content.style.opacity   = '0';
-                arrow.textContent       = '▼';
+                chevron.classList.remove('open');
+                btn.setAttribute('aria-expanded', 'false');
+            } else {
+                content.style.maxHeight = content.scrollHeight + 'px';
+                content.style.opacity   = '1';
+                chevron.classList.add('open');
+                btn.setAttribute('aria-expanded', 'true');
             }
         }
 
-        /* inicializa altura do conteúdo para a animação funcionar */
         window.addEventListener('DOMContentLoaded', () => {
-            const content = document.getElementById('controle-content');
-            content.style.maxHeight = content.scrollHeight + 'px';
+            document.querySelectorAll('.section-content').forEach(el => {
+                el.style.maxHeight = el.scrollHeight + 'px';
+                el.style.opacity   = '1';
+            });
         });
     </script>
 
